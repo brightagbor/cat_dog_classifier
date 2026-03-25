@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Binary Image Classifier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 420px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #1e3c72;
+        }
+
+        .upload-box {
+            border: 2px dashed #2a5298;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .upload-box:hover {
+            background: #f0f4ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #2a5298;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #1e3c72;
+        }
+
+        .preview {
+            margin-top: 15px;
+        }
+
+        .preview img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .result-card {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f7f9ff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .confidence-bar {
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: #2a5298;
+            width: {{ prediction * 100 if prediction else 0 }}%;
+            transition: width 0.5s ease;
+        }
+
+        .spinner {
+            display: none;
+            margin-top: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Image Classifier (Dog vs Cat)</h2>
+
+    <form id="uploadForm" action="/predict" method="post" enctype="multipart/form-data">
+        
+        <label class="upload-box">
+            Click or Drag Image Here
+            <input type="file" name="file" id="fileInput" required>
+        </label>
+
+        <div class="preview" id="preview"></div>
+
+        <button type="submit">Predict</button>
+
+        <div class="spinner" id="spinner">
+            🔄 Processing...
+        </div>
+    </form>
+
+    {% if prediction %}
+    <div class="result-card">
+        <h3>Prediction: {{ label }}</h3>
+        <p>Confidence: {{ (prediction * 100) | round(2) }}%</p>
+        <div class="confidence-bar">
+            <div class="confidence-fill"></div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    const form = document.getElementById("uploadForm");
+    const spinner = document.getElementById("spinner");
+
+    fileInput.addEventListener("change", function() {
+        preview.innerHTML = "";
+        const file = this.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    form.addEventListener("submit", function() {
+        spinner.style.display = "block";
+    });
+</script>
+
+</body>
+</html>
